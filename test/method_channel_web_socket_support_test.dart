@@ -286,6 +286,30 @@ void main() {
       await _testWsListener.destroy();
     });
 
+    test('Receive unexpected event from platform', () async {
+      final _testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(_testWsListener);
+
+      // action
+      // execute methodCall from platform
+      expect(
+          _sendMessageFromPlatform(
+              MethodChannelWebSocketSupport.methodChannelName,
+              MethodCall('invalid_call'), callback: (data) {
+            StandardMethodCodec().decodeEnvelope(data!);
+          }),
+          throwsA(predicate((e) =>
+              e is PlatformException &&
+              e.code ==
+                  MethodChannelWebSocketSupport.methodChannelExceptionCode &&
+              e.message ==
+                  MethodChannelWebSocketSupport.unexpectedMethodNameMessage &&
+              e.details == 'invalid_call')));
+
+      // clean up
+      await _testWsListener.destroy();
+    });
+
     test('Receive event from platform via textEventChannel', () async {
       final _testWsListener = TestWebSocketListener();
       MethodChannelWebSocketSupport(_testWsListener);
@@ -472,8 +496,9 @@ void main() {
 }
 
 Future<ByteData?> _sendMessageFromPlatform(
-    String channelName, MethodCall methodCall) {
+    String channelName, MethodCall methodCall,
+    {Function(ByteData?)? callback}) {
   final envelope = const StandardMethodCodec().encodeMethodCall(methodCall);
   return TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
-      .handlePlatformMessage(channelName, envelope, (data) {});
+      .handlePlatformMessage(channelName, envelope, callback);
 }

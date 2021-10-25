@@ -1,3 +1,7 @@
+## 0.2.1
+
+* Added support for web platform (removed dart:io dep)
+
 ## 0.2.0
 
 * Moved to null safety. Min SDK is 2.14.0

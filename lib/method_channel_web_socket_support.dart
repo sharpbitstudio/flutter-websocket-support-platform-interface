@@ -18,6 +18,8 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
       'tech.sharpbitstudio.web_socket_support/text-messages';
   static const byteEventChannelName =
       'tech.sharpbitstudio.web_socket_support/binary-messages';
+  static const methodChannelExceptionCode = 'METHOD_CHANNEL_EXCEPTION';
+  static const unexpectedMethodNameMessage = 'Unexpected method channel name';
 
   //
   // locals
@@ -64,7 +66,10 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
           _listener.onByteArrayMessage(call.arguments as Uint8List);
           break;
         default:
-          print('Unexpected method name: ${call.method}');
+          throw PlatformException(
+              code: methodChannelExceptionCode,
+              message: unexpectedMethodNameMessage,
+              details: '${call.method}');
       }
       return Future.value(null);
     });
