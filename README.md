@@ -1,4 +1,5 @@
 # web_socket_support_platform_interface
+[![Pub Version](https://img.shields.io/pub/v/web_socket_support_platform_interface)](https://pub.dev/packages/web_socket_support_platform_interface) ![github actions](https://github.com/sharpbitstudio/flutter-websocket-support-platform-interface/actions/workflows/master_build.yaml/badge.svg?branch=master) [![codecov](https://codecov.io/gh/sharpbitstudio/flutter-websocket-support-platform-interface/branch/master/graph/badge.svg?token=048H5HLA09)](https://codecov.io/gh/sharpbitstudio/flutter-websocket-support-platform-interface)
 
 A common platform interface for the web_socket_support plugin.
 
