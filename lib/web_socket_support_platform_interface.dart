@@ -56,8 +56,8 @@ abstract class WebSocketSupportPlatform extends PlatformInterface {
   }
 }
 
-/// This is Dummy WebSocketListener implementation which only logs events
-/// received from underlying platform WebSocket. It's really useless :-S
+/// This is Dummy WebSocketListener implementation which throws UnimplementedError
+/// on any event received from underlying platform WebSocket. It's really useless :-S
 class DummyWebSocketListener extends WebSocketListener {
   /// Prevent outside instantiation/extension
   /// (but unfortunately it can be implemented anyway..)

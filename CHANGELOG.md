@@ -1,3 +1,7 @@
+## 0.2.2
+
+* Minor fixes. WebSocketException now have all nullable fields.
+
 ## 0.2.1
 
 * Added support for web platform (removed dart:io dep)

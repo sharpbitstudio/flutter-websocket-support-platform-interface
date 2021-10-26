@@ -14,12 +14,6 @@ import 'test_web_socket_listener.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  // MethodChannel calls
-  final calledMethodsLog = <MethodCall>[];
-
-  // clear log before any test
-  setUp(() => calledMethodsLog.clear());
-
   group('$MethodChannelWebSocketSupport calls TO platform', () {
     test('Send `connect` event before we is established', () async {
       final _testWsListener = TestWebSocketListener();
@@ -382,7 +376,7 @@ void main() {
       MethodChannelWebSocketSupport(_testWsListener);
 
       // prepare
-      // text message channel mock (before we is opened)
+      // byte array message channel mock (before ws is opened)
       final _streamController = StreamController<Uint8List>.broadcast();
       EventChannelMock(
         channelName: MethodChannelWebSocketSupport.byteEventChannelName,
@@ -412,7 +406,7 @@ void main() {
       MethodChannelWebSocketSupport(_testWsListener);
 
       // prepare
-      // text message channel mock (before we is opened)
+      // byte array message channel mock (before ws is opened)
       final _streamController = StreamController<Uint8List>.broadcast();
       EventChannelMock(
         channelName: MethodChannelWebSocketSupport.byteEventChannelName,
