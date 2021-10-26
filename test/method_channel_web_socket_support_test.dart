@@ -14,12 +14,6 @@ import 'test_web_socket_listener.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  // MethodChannel calls
-  final calledMethodsLog = <MethodCall>[];
-
-  // clear log before any test
-  setUp(() => calledMethodsLog.clear());
-
   group('$MethodChannelWebSocketSupport calls TO platform', () {
     test('Send `connect` event before we is established', () async {
       final _testWsListener = TestWebSocketListener();
@@ -35,7 +29,7 @@ void main() {
               action: () {
                 _sendMessageFromPlatform(
                     MethodChannelWebSocketSupport.methodChannelName,
-                    MethodCall('onOpened'));
+                    const MethodCall('onOpened'));
                 _completer.complete();
               }),
         ],
@@ -43,7 +37,7 @@ void main() {
 
       // Act
       await _webSocketSupport.connect('ws://example.com/',
-          options: WebSocketOptions(
+          options: const WebSocketOptions(
             autoReconnect: true,
           ));
 
@@ -81,7 +75,7 @@ void main() {
       // open ws
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onOpened'));
+          const MethodCall('onOpened'));
 
       // method channel mock
       final _methodChannel = MethodChannelMock(
@@ -119,7 +113,7 @@ void main() {
       // open ws
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onOpened'));
+          const MethodCall('onOpened'));
 
       // method channel mock
       final _methodChannel = MethodChannelMock(
@@ -158,7 +152,7 @@ void main() {
       // open ws
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onOpened'));
+          const MethodCall('onOpened'));
 
       final _completer = Completer();
       final _methodChannel = MethodChannelMock(
@@ -169,7 +163,7 @@ void main() {
               action: () {
                 _sendMessageFromPlatform(
                     MethodChannelWebSocketSupport.methodChannelName,
-                    MethodCall('onClosed', <String, Object>{
+                    const MethodCall('onClosed', <String, Object>{
                       'code': 123,
                       'reason': 'test reason'
                     }));
@@ -213,7 +207,7 @@ void main() {
       // execute methodCall from platform
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onOpened'));
+          const MethodCall('onOpened'));
 
       // verify
       expect(_testWsListener.webSocketConnection, isNotNull);
@@ -230,7 +224,7 @@ void main() {
       // execute methodCall from platform
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onClosing',
+          const MethodCall('onClosing',
               <String, Object>{'code': 234, 'reason': 'test reason 2'}));
 
       // verify
@@ -250,7 +244,7 @@ void main() {
       // execute methodCall from platform
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onClosed',
+          const MethodCall('onClosed',
               <String, Object>{'code': 345, 'reason': 'test reason 3'}));
 
       // verify
@@ -270,7 +264,7 @@ void main() {
       // execute methodCall from platform
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onFailure', <String, Object>{
+          const MethodCall('onFailure', <String, Object>{
             'throwableType': 'TestType',
             'errorMessage': 'TestErrMsg',
             'causeMessage': 'TestErrCause'
@@ -295,8 +289,8 @@ void main() {
       expect(
           _sendMessageFromPlatform(
               MethodChannelWebSocketSupport.methodChannelName,
-              MethodCall('invalid_call'), callback: (data) {
-            StandardMethodCodec().decodeEnvelope(data!);
+              const MethodCall('invalid_call'), callback: (data) {
+            const StandardMethodCodec().decodeEnvelope(data!);
           }),
           throwsA(predicate((e) =>
               e is PlatformException &&
@@ -325,7 +319,7 @@ void main() {
       // open ws
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onOpened'));
+          const MethodCall('onOpened'));
 
       // action
       // emit test event
@@ -333,7 +327,9 @@ void main() {
 
       // verify
       expect(_testWsListener.webSocketConnection, isNotNull);
-      expect(await _testWsListener.textQueue.next.timeout(Duration(seconds: 1)),
+      expect(
+          await _testWsListener.textQueue.next
+              .timeout(const Duration(seconds: 1)),
           'Text message 1');
 
       // clean up
@@ -355,7 +351,7 @@ void main() {
       // open ws
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onOpened'));
+          const MethodCall('onOpened'));
 
       // action
       // emit test error event
@@ -367,7 +363,8 @@ void main() {
       // verify
       expect(_testWsListener.webSocketConnection, isNotNull);
 
-      await _testWsListener.errorCompleter.future.timeout(Duration(seconds: 1));
+      await _testWsListener.errorCompleter.future
+          .timeout(const Duration(seconds: 1));
       expect(_testWsListener.onErrorCalled, true);
       expect(_testWsListener.exception, isInstanceOf<PlatformException>());
       expect(_testWsListener.exception.toString(),
@@ -382,7 +379,7 @@ void main() {
       MethodChannelWebSocketSupport(_testWsListener);
 
       // prepare
-      // text message channel mock (before we is opened)
+      // byte array message channel mock (before ws is opened)
       final _streamController = StreamController<Uint8List>.broadcast();
       EventChannelMock(
         channelName: MethodChannelWebSocketSupport.byteEventChannelName,
@@ -392,7 +389,7 @@ void main() {
       // open ws
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onOpened'));
+          const MethodCall('onOpened'));
 
       // action
       // emit test event
@@ -400,7 +397,9 @@ void main() {
 
       // verify
       expect(_testWsListener.webSocketConnection, isNotNull);
-      expect(await _testWsListener.byteQueue.next.timeout(Duration(seconds: 1)),
+      expect(
+          await _testWsListener.byteQueue.next
+              .timeout(const Duration(seconds: 1)),
           'Binary message 1'.codeUnits);
 
       // clean up
@@ -412,7 +411,7 @@ void main() {
       MethodChannelWebSocketSupport(_testWsListener);
 
       // prepare
-      // text message channel mock (before we is opened)
+      // byte array message channel mock (before ws is opened)
       final _streamController = StreamController<Uint8List>.broadcast();
       EventChannelMock(
         channelName: MethodChannelWebSocketSupport.byteEventChannelName,
@@ -422,7 +421,7 @@ void main() {
       // open ws
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onOpened'));
+          const MethodCall('onOpened'));
 
       // action
       // emit error test event
@@ -434,7 +433,8 @@ void main() {
       // verify
       expect(_testWsListener.webSocketConnection, isNotNull);
 
-      await _testWsListener.errorCompleter.future.timeout(Duration(seconds: 1));
+      await _testWsListener.errorCompleter.future
+          .timeout(const Duration(seconds: 1));
       expect(_testWsListener.onErrorCalled, true);
       expect(_testWsListener.exception, isInstanceOf<PlatformException>());
       expect(_testWsListener.exception.toString(),
@@ -452,16 +452,18 @@ void main() {
       // open ws
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onOpened'));
+          const MethodCall('onOpened'));
 
       // Act -> onStringMessage
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onStringMessage', 'Fallback message 1'));
+          const MethodCall('onStringMessage', 'Fallback message 1'));
 
       // verify
       expect(_testWsListener.webSocketConnection, isNotNull);
-      expect(await _testWsListener.textQueue.next.timeout(Duration(seconds: 1)),
+      expect(
+          await _testWsListener.textQueue.next
+              .timeout(const Duration(seconds: 1)),
           'Fallback message 1');
 
       // clean up
@@ -476,7 +478,7 @@ void main() {
       // open ws
       await _sendMessageFromPlatform(
           MethodChannelWebSocketSupport.methodChannelName,
-          MethodCall('onOpened'));
+          const MethodCall('onOpened'));
 
       // Act -> onByteArrayMessage
       await _sendMessageFromPlatform(
@@ -486,7 +488,9 @@ void main() {
 
       // verify
       expect(_testWsListener.webSocketConnection, isNotNull);
-      expect(await _testWsListener.byteQueue.next.timeout(Duration(seconds: 1)),
+      expect(
+          await _testWsListener.byteQueue.next
+              .timeout(const Duration(seconds: 1)),
           'Fallback message 2'.codeUnits);
 
       // clean up

@@ -1,7 +1,7 @@
 class WebSocketException implements Exception {
-  final String originType;
-  final String message;
-  final String causeMessage;
+  final String? originType;
+  final String? message;
+  final String? causeMessage;
 
   WebSocketException(this.originType, this.message, this.causeMessage);
 

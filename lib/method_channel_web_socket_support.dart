@@ -33,9 +33,9 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
   StreamSubscription? _binaryStreamSubscription;
 
   MethodChannelWebSocketSupport(this._listener)
-      : _methodChannel = MethodChannel(methodChannelName),
-        _textMessagesChannel = EventChannel(textEventChannelName),
-        _byteMessagesChannel = EventChannel(byteEventChannelName) {
+      : _methodChannel = const MethodChannel(methodChannelName),
+        _textMessagesChannel = const EventChannel(textEventChannelName),
+        _byteMessagesChannel = const EventChannel(byteEventChannelName) {
     // set method channel listener
     _methodChannel.setMethodCallHandler((MethodCall call) {
       switch (call.method) {
@@ -45,17 +45,19 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
           _addStreamEventListeners();
           break;
         case 'onClosing':
-          var args = call.arguments as Map;
-          _listener.onWsClosing(args['code'], args['reason']);
+          final args = call.arguments as Map;
+          final code = args['code'] ?? 4000; // map[] returns nullable value
+          _listener.onWsClosing(code, args['reason'] ?? '');
           break;
         case 'onClosed':
           // ws closed
-          var args = call.arguments as Map;
-          _listener.onWsClosed(args['code'], args['reason']);
+          final args = call.arguments as Map;
+          final code = args['code'] ?? 4000; // map[] returns nullable value
+          _listener.onWsClosed(code, args['reason'] ?? '');
           _removeStreamEventListeners();
           break;
         case 'onFailure':
-          var args = call.arguments as Map;
+          final args = call.arguments as Map;
           _listener.onError(WebSocketException(args['throwableType'],
               args['errorMessage'], args['causeMessage']));
           break;
@@ -69,7 +71,7 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
           throw PlatformException(
               code: methodChannelExceptionCode,
               message: unexpectedMethodNameMessage,
-              details: '${call.method}');
+              details: call.method);
       }
       return Future.value(null);
     });
