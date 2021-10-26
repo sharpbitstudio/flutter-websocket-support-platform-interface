@@ -1,6 +1,7 @@
 ## 0.2.2
 
-* Minor fixes. WebSocketException now have all nullable fields.
+* New linter -> flutter_lints: ^1.0.4. 
+* WebSocketException now have all nullable fields.
 
 ## 0.2.1
 

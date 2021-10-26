@@ -33,9 +33,9 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
   StreamSubscription? _binaryStreamSubscription;
 
   MethodChannelWebSocketSupport(this._listener)
-      : _methodChannel = MethodChannel(methodChannelName),
-        _textMessagesChannel = EventChannel(textEventChannelName),
-        _byteMessagesChannel = EventChannel(byteEventChannelName) {
+      : _methodChannel = const MethodChannel(methodChannelName),
+        _textMessagesChannel = const EventChannel(textEventChannelName),
+        _byteMessagesChannel = const EventChannel(byteEventChannelName) {
     // set method channel listener
     _methodChannel.setMethodCallHandler((MethodCall call) {
       switch (call.method) {
@@ -71,7 +71,7 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
           throw PlatformException(
               code: methodChannelExceptionCode,
               message: unexpectedMethodNameMessage,
-              details: '${call.method}');
+              details: call.method);
       }
       return Future.value(null);
     });
