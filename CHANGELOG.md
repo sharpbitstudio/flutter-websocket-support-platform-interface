@@ -1,3 +1,8 @@
+## 0.3.0
+
+* `connect` now returns `Future<bool?>` instead of `Future<void>`
+* `disconnect` now returns `Future<bool?>` instead of `Future<void>`
+
 ## 0.2.2
 
 * New linter -> flutter_lints: ^1.0.4. 

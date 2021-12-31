@@ -39,7 +39,7 @@ abstract class WebSocketSupportPlatform extends PlatformInterface {
 
   /// Initialize ws connection to specified server url.
   /// If connection was successful, [onWsOpened] will be invoked.
-  Future<void> connect(
+  Future<bool?> connect(
     String serverUrl, {
     WebSocketOptions options = const WebSocketOptions(),
   }) {
@@ -48,7 +48,7 @@ abstract class WebSocketSupportPlatform extends PlatformInterface {
 
   /// Initialize ws connection close by client.
   /// When connection is successfully closed, [onWsClosed] will be invoked.
-  Future<void> disconnect({
+  Future<bool?> disconnect({
     int code = 1000,
     String reason = 'Client done.',
   }) {

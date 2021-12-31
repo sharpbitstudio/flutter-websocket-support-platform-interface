@@ -25,26 +25,32 @@ void main() {
         channelName: MethodChannelWebSocketSupport.methodChannelName,
         methodMocks: [
           MethodMock(
-              method: 'connect',
-              action: () {
-                _sendMessageFromPlatform(
-                    MethodChannelWebSocketSupport.methodChannelName,
-                    const MethodCall('onOpened'));
-                _completer.complete();
-              }),
+            method: 'connect',
+            action: () {
+              _sendMessageFromPlatform(
+                  MethodChannelWebSocketSupport.methodChannelName,
+                  const MethodCall('onOpened'));
+              _completer.complete();
+            },
+            result: true,
+          ),
         ],
       );
 
       // Act
-      await _webSocketSupport.connect('ws://example.com/',
-          options: const WebSocketOptions(
-            autoReconnect: true,
-          ));
+      final commandSent = await _webSocketSupport.connect(
+        'ws://example.com/',
+        options: const WebSocketOptions(
+          autoReconnect: true,
+        ),
+      );
 
       // await completer
       await _completer.future;
 
       // Assert
+      // connect returns true if command is accepted
+      expect(commandSent, isTrue);
       // correct event sent to platform
       expect(
         _methodChannel.log,
@@ -89,10 +95,12 @@ void main() {
       );
 
       // Act - send text message
-      await _testWsListener.webSocketConnection!
+      final commandSent = await _testWsListener.webSocketConnection!
           .sendStringMessage('test payload 1');
 
       // Assert
+      // command returns true if it is accepted
+      expect(commandSent, isTrue);
       // correct event sent to platform
       expect(
         _methodChannel.log,
@@ -127,10 +135,12 @@ void main() {
       );
 
       // Act - send text message
-      await _testWsListener.webSocketConnection!
+      final commandSent = await _testWsListener.webSocketConnection!
           .sendByteArrayMessage(Uint8List.fromList('test payload 2'.codeUnits));
 
       // Assert
+      // command returns true if it is accepted
+      expect(commandSent, isTrue);
       // correct event sent to platform
       expect(
         _methodChannel.log,
@@ -159,26 +169,29 @@ void main() {
         channelName: MethodChannelWebSocketSupport.methodChannelName,
         methodMocks: [
           MethodMock(
-              method: 'disconnect',
-              action: () {
-                _sendMessageFromPlatform(
-                    MethodChannelWebSocketSupport.methodChannelName,
-                    const MethodCall('onClosed', <String, Object>{
-                      'code': 123,
-                      'reason': 'test reason'
-                    }));
-                _completer.complete();
-              }),
+            method: 'disconnect',
+            action: () {
+              _sendMessageFromPlatform(
+                  MethodChannelWebSocketSupport.methodChannelName,
+                  const MethodCall('onClosed',
+                      <String, Object>{'code': 123, 'reason': 'test reason'}));
+              _completer.complete();
+            },
+            result: true,
+          ),
         ],
       );
 
       // Act -> disconnect
-      await _webSocketSupport.disconnect(code: 123, reason: 'test reason');
+      final commandSent =
+          await _webSocketSupport.disconnect(code: 123, reason: 'test reason');
 
       // await completer
       await _completer.future;
 
       // Assert
+      // command returns true if it is accepted
+      expect(commandSent, isTrue);
       // correct event sent to platform
       expect(
         _methodChannel.log,

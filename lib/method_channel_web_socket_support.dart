@@ -88,12 +88,12 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
   WebSocketListener get listener => _listener;
 
   @override
-  Future<void> connect(
+  Future<bool?> connect(
     String serverUrl, {
     WebSocketOptions options = const WebSocketOptions(),
   }) {
     // connect to server
-    return _methodChannel.invokeMethod<void>(
+    return _methodChannel.invokeMethod<bool>(
       'connect',
       <String, Object>{
         'serverUrl': serverUrl,
@@ -103,8 +103,8 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
   }
 
   @override
-  Future<void> disconnect({int code = 1000, String reason = 'Client done.'}) {
-    return _methodChannel.invokeMethod<void>(
+  Future<bool?> disconnect({int code = 1000, String reason = 'Client done.'}) {
+    return _methodChannel.invokeMethod<bool>(
       'disconnect',
       <String, Object>{
         'code': code,
