@@ -11,9 +11,12 @@ import 'package:web_socket_support_platform_interface/web_socket_support_platfor
 class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
   //
   // constants
-  static const methodChannelName = 'tech.sharpbitstudio.web_socket_support/methods';
-  static const textEventChannelName = 'tech.sharpbitstudio.web_socket_support/text-messages';
-  static const byteEventChannelName = 'tech.sharpbitstudio.web_socket_support/binary-messages';
+  static const methodChannelName =
+      'tech.sharpbitstudio.web_socket_support/methods';
+  static const textEventChannelName =
+      'tech.sharpbitstudio.web_socket_support/text-messages';
+  static const byteEventChannelName =
+      'tech.sharpbitstudio.web_socket_support/binary-messages';
   static const methodChannelExceptionCode = 'METHOD_CHANNEL_EXCEPTION';
   static const unexpectedMethodNameMessage = 'Unexpected method channel name';
 
@@ -54,7 +57,8 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
           break;
         case 'onFailure':
           final args = call.arguments as Map;
-          _listener.onError(WebSocketException(args['throwableType'], args['errorMessage'], args['causeMessage']));
+          _listener.onError(WebSocketException(args['throwableType'],
+              args['errorMessage'], args['causeMessage']));
           break;
         case 'onStringMessage':
           _listener.onStringMessage(call.arguments as String);
@@ -64,7 +68,9 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
           break;
         default:
           throw PlatformException(
-              code: methodChannelExceptionCode, message: unexpectedMethodNameMessage, details: call.method);
+              code: methodChannelExceptionCode,
+              message: unexpectedMethodNameMessage,
+              details: call.method);
       }
       return Future.value(null);
     });
@@ -73,8 +79,8 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
   /// This constructor is only used for testing and shouldn't be accessed by
   /// users of the plugin. It may break or change at any time.
   @visibleForTesting
-  MethodChannelWebSocketSupport.private(
-      this._listener, this._methodChannel, this._textMessagesChannel, this._byteMessagesChannel);
+  MethodChannelWebSocketSupport.private(this._listener, this._methodChannel,
+      this._textMessagesChannel, this._byteMessagesChannel);
 
   /// obtain WebSocketListener implementation
   @visibleForTesting
@@ -108,14 +114,16 @@ class MethodChannelWebSocketSupport extends WebSocketSupportPlatform {
 
   void _addStreamEventListeners() {
     // add text message listener
-    _textStreamSubscription = _textMessagesChannel.receiveBroadcastStream().listen((message) {
+    _textStreamSubscription =
+        _textMessagesChannel.receiveBroadcastStream().listen((message) {
       _listener.onStringMessage(message as String);
     }, onError: (e) {
       _listener.onError(e);
     });
 
     // add byte messages listener
-    _binaryStreamSubscription = _byteMessagesChannel.receiveBroadcastStream().listen((message) {
+    _binaryStreamSubscription =
+        _byteMessagesChannel.receiveBroadcastStream().listen((message) {
       _listener.onByteArrayMessage(message as Uint8List);
     }, onError: (e) {
       _listener.onError(e);

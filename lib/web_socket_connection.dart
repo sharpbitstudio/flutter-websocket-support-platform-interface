@@ -22,6 +22,7 @@ class DefaultWebSocketConnection implements WebSocketConnection {
 
   @override
   Future<bool?> sendByteArrayMessage(Uint8List byteArrayMessage) {
-    return _methodChannel.invokeMethod('sendByteArrayMessage', byteArrayMessage);
+    return _methodChannel.invokeMethod(
+        'sendByteArrayMessage', byteArrayMessage);
   }
 }
