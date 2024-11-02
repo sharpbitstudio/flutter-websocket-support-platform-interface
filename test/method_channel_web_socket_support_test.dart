@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web_socket_support_platform_interface/method_channel_web_socket_support.dart';
-import 'package:web_socket_support_platform_interface/web_scoket_exception.dart';
+import 'package:web_socket_support_platform_interface/web_socket_exception.dart';
 import 'package:web_socket_support_platform_interface/web_socket_options.dart';
 
 import 'event_channel_mock.dart';
@@ -16,12 +15,12 @@ void main() {
 
   group('$MethodChannelWebSocketSupport calls TO platform', () {
     test('Send `connect` event before we is established', () async {
-      final _testWsListener = TestWebSocketListener();
-      final _webSocketSupport = MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      final webSocketSupport = MethodChannelWebSocketSupport(testWsListener);
 
       // Arrange
-      final _completer = Completer();
-      final _methodChannel = MethodChannelMock(
+      final completer = Completer();
+      final methodChannel = MethodChannelMock(
         channelName: MethodChannelWebSocketSupport.methodChannelName,
         methodMocks: [
           MethodMock(
@@ -30,7 +29,7 @@ void main() {
               _sendMessageFromPlatform(
                   MethodChannelWebSocketSupport.methodChannelName,
                   const MethodCall('onOpened'));
-              _completer.complete();
+              completer.complete();
             },
             result: true,
           ),
@@ -38,7 +37,7 @@ void main() {
       );
 
       // Act
-      final commandSent = await _webSocketSupport.connect(
+      final commandSent = await webSocketSupport.connect(
         'ws://example.com/',
         options: const WebSocketOptions(
           autoReconnect: true,
@@ -46,14 +45,14 @@ void main() {
       );
 
       // await completer
-      await _completer.future;
+      await completer.future;
 
       // Assert
       // connect returns true if command is accepted
       expect(commandSent, isTrue);
       // correct event sent to platform
       expect(
-        _methodChannel.log,
+        methodChannel.log,
         <Matcher>[
           isMethodCall('connect', arguments: <String, Object>{
             'serverUrl': 'ws://example.com/',
@@ -67,15 +66,15 @@ void main() {
       );
 
       // platform response 'onOpened' created wsConnection
-      expect(_testWsListener.webSocketConnection, isNotNull);
+      expect(testWsListener.webSocketConnection, isNotNull);
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Send `text` message after ws is established', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // Arrange
       // open ws
@@ -84,7 +83,7 @@ void main() {
           const MethodCall('onOpened'));
 
       // method channel mock
-      final _methodChannel = MethodChannelMock(
+      final methodChannel = MethodChannelMock(
         channelName: MethodChannelWebSocketSupport.methodChannelName,
         methodMocks: [
           MethodMock(
@@ -95,7 +94,7 @@ void main() {
       );
 
       // Act - send text message
-      final commandSent = await _testWsListener.webSocketConnection!
+      final commandSent = await testWsListener.webSocketConnection!
           .sendStringMessage('test payload 1');
 
       // Assert
@@ -103,19 +102,19 @@ void main() {
       expect(commandSent, isTrue);
       // correct event sent to platform
       expect(
-        _methodChannel.log,
+        methodChannel.log,
         <Matcher>[
           isMethodCall('sendStringMessage', arguments: 'test payload 1'),
         ],
       );
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Send `binary` message after ws is established', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // Arrange
       // open ws
@@ -124,7 +123,7 @@ void main() {
           const MethodCall('onOpened'));
 
       // method channel mock
-      final _methodChannel = MethodChannelMock(
+      final methodChannel = MethodChannelMock(
         channelName: MethodChannelWebSocketSupport.methodChannelName,
         methodMocks: [
           MethodMock(
@@ -135,7 +134,7 @@ void main() {
       );
 
       // Act - send text message
-      final commandSent = await _testWsListener.webSocketConnection!
+      final commandSent = await testWsListener.webSocketConnection!
           .sendByteArrayMessage(Uint8List.fromList('test payload 2'.codeUnits));
 
       // Assert
@@ -143,7 +142,7 @@ void main() {
       expect(commandSent, isTrue);
       // correct event sent to platform
       expect(
-        _methodChannel.log,
+        methodChannel.log,
         <Matcher>[
           isMethodCall('sendByteArrayMessage',
               arguments: 'test payload 2'.codeUnits),
@@ -151,12 +150,12 @@ void main() {
       );
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Send `disconnect` event after we is established', () async {
-      final _testWsListener = TestWebSocketListener();
-      final _webSocketSupport = MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      final webSocketSupport = MethodChannelWebSocketSupport(testWsListener);
 
       // Arrange
       // open ws
@@ -164,8 +163,8 @@ void main() {
           MethodChannelWebSocketSupport.methodChannelName,
           const MethodCall('onOpened'));
 
-      final _completer = Completer();
-      final _methodChannel = MethodChannelMock(
+      final completer = Completer();
+      final methodChannel = MethodChannelMock(
         channelName: MethodChannelWebSocketSupport.methodChannelName,
         methodMocks: [
           MethodMock(
@@ -175,7 +174,7 @@ void main() {
                   MethodChannelWebSocketSupport.methodChannelName,
                   const MethodCall('onClosed',
                       <String, Object>{'code': 123, 'reason': 'test reason'}));
-              _completer.complete();
+              completer.complete();
             },
             result: true,
           ),
@@ -184,17 +183,17 @@ void main() {
 
       // Act -> disconnect
       final commandSent =
-          await _webSocketSupport.disconnect(code: 123, reason: 'test reason');
+          await webSocketSupport.disconnect(code: 123, reason: 'test reason');
 
       // await completer
-      await _completer.future;
+      await completer.future;
 
       // Assert
       // command returns true if it is accepted
       expect(commandSent, isTrue);
       // correct event sent to platform
       expect(
-        _methodChannel.log,
+        methodChannel.log,
         <Matcher>[
           isMethodCall('disconnect', arguments: <String, Object>{
             'code': 123,
@@ -204,17 +203,17 @@ void main() {
       );
 
       // platform response 'onOpened' created wsConnection
-      expect(_testWsListener.webSocketConnection, isNotNull);
+      expect(testWsListener.webSocketConnection, isNotNull);
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
   });
 
   group('$MethodChannelWebSocketSupport calls FROM platform', () {
     test('Receive `onOpened` event from platform', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // action
       // execute methodCall from platform
@@ -223,15 +222,15 @@ void main() {
           const MethodCall('onOpened'));
 
       // verify
-      expect(_testWsListener.webSocketConnection, isNotNull);
+      expect(testWsListener.webSocketConnection, isNotNull);
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Receive `onClosing` event from platform', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // action
       // execute methodCall from platform
@@ -241,17 +240,17 @@ void main() {
               <String, Object>{'code': 234, 'reason': 'test reason 2'}));
 
       // verify
-      expect(_testWsListener.onClosingCalled, true);
-      expect(_testWsListener.closingCode, 234);
-      expect(_testWsListener.closingReason, 'test reason 2');
+      expect(testWsListener.onClosingCalled, true);
+      expect(testWsListener.closingCode, 234);
+      expect(testWsListener.closingReason, 'test reason 2');
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Receive `onClosed` event from platform', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // action
       // execute methodCall from platform
@@ -261,17 +260,17 @@ void main() {
               <String, Object>{'code': 345, 'reason': 'test reason 3'}));
 
       // verify
-      expect(_testWsListener.onClosedCalled, true);
-      expect(_testWsListener.closingCode, 345);
-      expect(_testWsListener.closingReason, 'test reason 3');
+      expect(testWsListener.onClosedCalled, true);
+      expect(testWsListener.closingCode, 345);
+      expect(testWsListener.closingReason, 'test reason 3');
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Receive `onFailure` event from platform', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // action
       // execute methodCall from platform
@@ -284,18 +283,18 @@ void main() {
           }));
 
       // verify
-      expect(_testWsListener.onErrorCalled, true);
-      expect(_testWsListener.exception, isInstanceOf<WebSocketException>());
-      expect(_testWsListener.exception.toString(),
+      expect(testWsListener.onErrorCalled, true);
+      expect(testWsListener.exception, isInstanceOf<WebSocketException>());
+      expect(testWsListener.exception.toString(),
           'WebSocketException[type:TestType, message:TestErrMsg, cause:TestErrCause]');
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Receive unexpected event from platform', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // action
       // execute methodCall from platform
@@ -314,19 +313,19 @@ void main() {
               e.details == 'invalid_call')));
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Receive event from platform via textEventChannel', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // prepare
       // text message channel mock (before we is opened)
-      final _streamController = StreamController<String>.broadcast();
+      final streamController = StreamController<String>.broadcast();
       EventChannelMock(
         channelName: MethodChannelWebSocketSupport.textEventChannelName,
-        stream: _streamController.stream,
+        stream: streamController.stream,
       );
 
       // open ws
@@ -336,29 +335,29 @@ void main() {
 
       // action
       // emit test event
-      _streamController.add('Text message 1');
+      streamController.add('Text message 1');
 
       // verify
-      expect(_testWsListener.webSocketConnection, isNotNull);
+      expect(testWsListener.webSocketConnection, isNotNull);
       expect(
-          await _testWsListener.textQueue.next
+          await testWsListener.textQueue.next
               .timeout(const Duration(seconds: 1)),
           'Text message 1');
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Receive error event from platform via textEventChannel', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // prepare
       // text message channel mock (before we is opened)
-      final _streamController = StreamController<String>.broadcast();
+      final streamController = StreamController<String>.broadcast();
       EventChannelMock(
         channelName: MethodChannelWebSocketSupport.textEventChannelName,
-        stream: _streamController.stream,
+        stream: streamController.stream,
       );
 
       // open ws
@@ -368,35 +367,35 @@ void main() {
 
       // action
       // emit test error event
-      _streamController.addError(
+      streamController.addError(
         PlatformException(
             code: 'ERROR_CODE_3', message: 'errMsg3', details: null),
       );
 
       // verify
-      expect(_testWsListener.webSocketConnection, isNotNull);
+      expect(testWsListener.webSocketConnection, isNotNull);
 
-      await _testWsListener.errorCompleter.future
+      await testWsListener.errorCompleter.future
           .timeout(const Duration(seconds: 1));
-      expect(_testWsListener.onErrorCalled, true);
-      expect(_testWsListener.exception, isInstanceOf<PlatformException>());
-      expect(_testWsListener.exception.toString(),
+      expect(testWsListener.onErrorCalled, true);
+      expect(testWsListener.exception, isInstanceOf<PlatformException>());
+      expect(testWsListener.exception.toString(),
           'PlatformException(ERROR_CODE_3, errMsg3, null, null)');
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Receive event from platform via byteEventChannel', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // prepare
       // byte array message channel mock (before ws is opened)
-      final _streamController = StreamController<Uint8List>.broadcast();
+      final streamController = StreamController<Uint8List>.broadcast();
       EventChannelMock(
         channelName: MethodChannelWebSocketSupport.byteEventChannelName,
-        stream: _streamController.stream,
+        stream: streamController.stream,
       );
 
       // open ws
@@ -406,29 +405,29 @@ void main() {
 
       // action
       // emit test event
-      _streamController.add(Uint8List.fromList('Binary message 1'.codeUnits));
+      streamController.add(Uint8List.fromList('Binary message 1'.codeUnits));
 
       // verify
-      expect(_testWsListener.webSocketConnection, isNotNull);
+      expect(testWsListener.webSocketConnection, isNotNull);
       expect(
-          await _testWsListener.byteQueue.next
+          await testWsListener.byteQueue.next
               .timeout(const Duration(seconds: 1)),
           'Binary message 1'.codeUnits);
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Receive error event from platform via byteEventChannel', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // prepare
       // byte array message channel mock (before ws is opened)
-      final _streamController = StreamController<Uint8List>.broadcast();
+      final streamController = StreamController<Uint8List>.broadcast();
       EventChannelMock(
         channelName: MethodChannelWebSocketSupport.byteEventChannelName,
-        stream: _streamController.stream,
+        stream: streamController.stream,
       );
 
       // open ws
@@ -438,28 +437,28 @@ void main() {
 
       // action
       // emit error test event
-      _streamController.addError(
+      streamController.addError(
         PlatformException(
             code: 'ERROR_CODE_4', message: 'errMsg4', details: null),
       );
 
       // verify
-      expect(_testWsListener.webSocketConnection, isNotNull);
+      expect(testWsListener.webSocketConnection, isNotNull);
 
-      await _testWsListener.errorCompleter.future
+      await testWsListener.errorCompleter.future
           .timeout(const Duration(seconds: 1));
-      expect(_testWsListener.onErrorCalled, true);
-      expect(_testWsListener.exception, isInstanceOf<PlatformException>());
-      expect(_testWsListener.exception.toString(),
+      expect(testWsListener.onErrorCalled, true);
+      expect(testWsListener.exception, isInstanceOf<PlatformException>());
+      expect(testWsListener.exception.toString(),
           'PlatformException(ERROR_CODE_4, errMsg4, null, null)');
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Receive `onStringMessage` event via MethodChannel', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // Arrange
       // open ws
@@ -473,19 +472,19 @@ void main() {
           const MethodCall('onStringMessage', 'Fallback message 1'));
 
       // verify
-      expect(_testWsListener.webSocketConnection, isNotNull);
+      expect(testWsListener.webSocketConnection, isNotNull);
       expect(
-          await _testWsListener.textQueue.next
+          await testWsListener.textQueue.next
               .timeout(const Duration(seconds: 1)),
           'Fallback message 1');
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
 
     test('Receive `onByteArrayMessage` event via MethodChannel', () async {
-      final _testWsListener = TestWebSocketListener();
-      MethodChannelWebSocketSupport(_testWsListener);
+      final testWsListener = TestWebSocketListener();
+      MethodChannelWebSocketSupport(testWsListener);
 
       // Arrange
       // open ws
@@ -500,14 +499,14 @@ void main() {
               Uint8List.fromList('Fallback message 2'.codeUnits)));
 
       // verify
-      expect(_testWsListener.webSocketConnection, isNotNull);
+      expect(testWsListener.webSocketConnection, isNotNull);
       expect(
-          await _testWsListener.byteQueue.next
+          await testWsListener.byteQueue.next
               .timeout(const Duration(seconds: 1)),
           'Fallback message 2'.codeUnits);
 
       // clean up
-      await _testWsListener.destroy();
+      await testWsListener.destroy();
     });
   });
 }
@@ -516,6 +515,6 @@ Future<ByteData?> _sendMessageFromPlatform(
     String channelName, MethodCall methodCall,
     {Function(ByteData?)? callback}) {
   final envelope = const StandardMethodCodec().encodeMethodCall(methodCall);
-  return TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+  return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .handlePlatformMessage(channelName, envelope, callback);
 }

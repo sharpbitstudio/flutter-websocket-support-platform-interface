@@ -1,9 +1,8 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
-import 'package:web_socket_support_platform_interface/web_scoket_exception.dart';
+import 'package:web_socket_support_platform_interface/web_socket_exception.dart';
 import 'package:web_socket_support_platform_interface/web_socket_connection.dart';
 import 'package:web_socket_support_platform_interface/web_socket_listener.dart';
 import 'package:web_socket_support_platform_interface/web_socket_options.dart';
